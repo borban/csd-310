@@ -63,9 +63,10 @@ def show_account_menu(_cursor, _user_id):
             show_wishlist(_cursor, _user_id)
         if(account_choice == str(2)):
             book_id = show_books_to_add(_cursor, _user_id)
-
             if(book_id):
-                add_book_to_wishlist(_cursor, _user_id, book_id)
+                isAdded = add_book_to_wishlist(_cursor, _user_id, book_id)
+                print("Book Successfully Added")
+                
 
 def show_wishlist(_cursor, _user_id):
     _cursor.execute("SELECT b.book_name, b.author, b.details FROM book b INNER JOIN wishlist w ON w.book_id = b.book_id WHERE w.user_id =" + _user_id)
@@ -79,11 +80,21 @@ def show_wishlist(_cursor, _user_id):
                 print("Details: " + book[2])
 
 def show_books_to_add(_cursor, _user_id):
-    book_id = str(0)
-    return book_id
+    _cursor.execute("SELECT * FROM book WHERE book_id NOT IN (SELECT book_id FROM wishlist WHERE user_id =" + _user_id + ")")
+    books = _cursor.fetchall()
+    
+    for book in books:
+        print(book)
+    
+    return str(input("Enter Book ID to add to Wishlist: "))
+
 
 def add_book_to_wishlist(_cursor, _user_id, _book_id):
-    print("Add book to wishlist")
+    _cursor.execute("INSERT INTO wishlist(user_id, book_id) VALUES('" + _user_id + "', '"+ _book_id + "')")
+    _cursor.execute("SELECT book_id FROM wishlist WHERE user_id=" + _user_id + " AND book_id =" + _book_id)
+    isAdded = _cursor.fetchall()
+
+    return isAdded
 
 show_menu()
 
